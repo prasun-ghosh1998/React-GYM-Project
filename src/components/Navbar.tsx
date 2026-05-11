@@ -17,6 +17,7 @@ import { useAppSelector } from "../services/helper/redux";
 const Navbar = () => {
   const { role, token } = useAppSelector((state) => state.auth);
     console.log("role, token in navbar", role, token);
+    
   const navStyle:any = ({ isActive }: any) => ({
     color: isActive ? "black" : "white",
     backgroundColor: isActive ? "#FFD700" : "transparent",
