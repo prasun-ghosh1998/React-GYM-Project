@@ -25,6 +25,16 @@ import {
 } from "../../store/slices/workout.slice";
 import AddWorkoutDialog from "../../components/AddWorkoutDialog";
 
+type Workout = {
+  $id: string;
+  title: string;
+  tag: string;
+  desc: string;
+  name: string;
+  img: string;
+  status?: string;
+};
+
 const WorkoutManagement = () => {
   const { loading, error, list, page, limit } = useAppSelector(
     (state) => state.workout,
@@ -32,7 +42,7 @@ const WorkoutManagement = () => {
   const dispatch = useAppDispatch();
 
   const [open, setOpen] = useState(false);
-  const [editData, setEditData] = useState<any>(null);
+  const [editData, setEditData] = useState<Workout | null>(null);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -84,53 +94,58 @@ const WorkoutManagement = () => {
           </TableHead>
 
           <TableBody>
-            {list?.map((row: any) => (
-              <TableRow key={row.$id}>
-                <TableCell>{row.title}</TableCell>
-                <TableCell>{row.tag}</TableCell>
-                <TableCell>{row.desc}</TableCell>
-                <TableCell>{row.name}</TableCell>
-                <TableCell>
-                  <img src={row.img} alt="workout" width={60} />
-                </TableCell>
-                <TableCell sx={{ display: "flex" }}>
-                  {/* Status Toggle */}
-                  <Switch
-                    checked={row.status === "publish"}
-                    onChange={() =>
-                      dispatch(
-                        statusChange({
-                          id: row.$id,
-                          currentStatus: row.status,
-                        }),
-                      )
-                    }
-                  />
+  {list?.map((row) => (
+    <TableRow key={row.$id}>
+      <TableCell>{row.title}</TableCell>
+      <TableCell>{row.tag}</TableCell>
+      <TableCell>{row.desc}</TableCell>
+      <TableCell>{row.name}</TableCell>
 
-                  {/* Edit */}
-                  <Button
-                    variant="contained"
-                    sx={{ backgroundColor: "#d5d50e", ml: 1 }}
-                    onClick={() => {
-                      setEditData(row);
-                      setOpen(true);
-                    }}
-                  >
-                    Edit
-                  </Button>
+      <TableCell>
+        <img src={row.img} alt="workout" width={60} />
+      </TableCell>
 
-                  {/* Delete */}
-                  <Button
-                    variant="contained"
-                    sx={{ backgroundColor: "#dd3a2b", ml: 1 }}
-                    onClick={() => dispatch(deleteWorkout(row.$id))}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
+      <TableCell sx={{ display: "flex" }}>
+        <Switch
+          checked={row.status === "publish"}
+          onChange={() =>
+            dispatch(
+              statusChange({
+                id: row.$id,
+                currentStatus: row.status,
+              }),
+            )
+          }
+        />
+
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: "#d5d50e", ml: 1 }}
+          onClick={() => {
+            setEditData(row);
+            setOpen(true);
+          }}
+        >
+          Edit
+        </Button>
+
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: "#dd3a2b", ml: 1 }}
+          onClick={() =>
+  dispatch(
+    deleteWorkout({
+      id: row.$id,
+    }),
+  )
+}
+        >
+          Delete
+        </Button>
+      </TableCell>
+    </TableRow>
+  ))}
+</TableBody>
 
           {/* Footer */}
           <TableFooter>

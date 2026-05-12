@@ -42,7 +42,7 @@ const schema = yup.object({
 type FormData = {
   name: string;
   title: string;
-  img: FileList;
+  img?: FileList;
 };
 
 const AddTrainerDialog: React.FC<AddTrainerDialogProps> = ({
@@ -75,14 +75,14 @@ const AddTrainerDialog: React.FC<AddTrainerDialogProps> = ({
       reset({
         name: editData.name,
         title: editData.title,
-        img: undefined as any,
+        img: undefined,
       });
       setPreview(editData.img);
     } else {
       reset({
         name: "",
         title: "",
-        img: undefined as any,
+        img: undefined,
       });
       setPreview(null);
     }
@@ -164,16 +164,17 @@ const AddTrainerDialog: React.FC<AddTrainerDialogProps> = ({
           />
 
           <input
-            type="file"
-            accept="image/*"
-            {...register("img")}
-            onChange={(e: any) => {
-              const file = e.target.files[0];
-              if (file) {
-                setPreview(URL.createObjectURL(file));
-              }
-            }}
-          />
+  type="file"
+  accept="image/*"
+  {...register("img")}
+  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+    }
+  }}
+/>
 
           {errors.img && (
             <Typography color="error" variant="caption">

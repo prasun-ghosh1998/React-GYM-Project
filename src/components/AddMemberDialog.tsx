@@ -39,6 +39,12 @@ type FormData = {
   phone: string;
   plan: string;
 };
+type Plan = {
+  $id: string;
+  duration: number;
+  title: string;
+  price: number;
+};
 
 const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
   open,
@@ -47,7 +53,9 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state) => state.member);
-  const { list: plans = [] } = useAppSelector((state) => state.plan);
+const { list: plans = [] } = useAppSelector(
+  (state): { list: Plan[] } => state.plan
+);
 
   const {
     control,
@@ -89,7 +97,7 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
   }, [editData, reset]);
 
  const onSubmit = async (data: FormData) => {
-  const selectedPlan = plans.find((p: any) => p.$id === data.plan);
+  const selectedPlan = plans.find((p) => p.$id === data.plan);
 
   if (!selectedPlan) {
     toast.error("Please select a valid plan");
@@ -99,7 +107,7 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
   const today = new Date();
   const expiry = new Date();
 
-  const duration = Number(selectedPlan.duration || 0);
+  const duration = Number(selectedPlan?.duration ?? 0);
   expiry.setDate(today.getDate() + duration);
 
  const payload = {

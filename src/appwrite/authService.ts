@@ -68,7 +68,7 @@ export const loginUser = async (email: string,) => {
     );
     console.log("existing user", existingUser);
     if (existingUser.total === 0) {
-      return rejectWithValue({ success: false, message: "User not found!" });
+      throw new Error("User not found!");
     }
     // await account.deleteSessions() 
     // await account.createEmailPasswordSession( email: data.email, password: data.password, });     

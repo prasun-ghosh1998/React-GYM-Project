@@ -1,5 +1,4 @@
 import type { SidebarItem } from "../../typeScript/interface/global.interface";
-import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import PaymentIcon from "@mui/icons-material/Payment";
@@ -9,7 +8,6 @@ import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
 
 import {
   Dashboard,
-  MiscellaneousServices,
 
 } from "@mui/icons-material";
 
