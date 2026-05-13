@@ -24,26 +24,32 @@ type AddTrainerDialogProps = {
   editData?: any;
 };
 
-// ✅ Schema (FIXED for edit)
-const schema = yup.object({
-  name: yup.string().required("Name is required"),
-  title: yup.string().required("Title is required"),
-  img: yup.mixed<FileList>().test(
-    "fileRequired",
-    "Image is required",
-    function (value) {
-      const { isEdit } = this.options.context as any;
-      if (isEdit) return true; // ✅ allow empty on edit
-      return value && value.length > 0;
-    }
-  ),
-});
-
 type FormData = {
   name: string;
   title: string;
   img?: FileList;
 };
+// ✅ Schema (FIXED for edit)
+const schema: yup.ObjectSchema<FormData> = yup.object({
+  name: yup.string().required("Name is required"),
+  title: yup.string().required("Title is required"),
+  img: yup
+    .mixed<FileList>()
+    .optional()
+    .test(
+      "fileRequired",
+      "Image is required",
+      function (value) {
+        const { isEdit } = this.options.context as {
+          isEdit: boolean;
+        };
+
+        if (isEdit) return true;
+
+        return !!value && value.length > 0;
+      }
+    ),
+});
 
 const AddTrainerDialog: React.FC<AddTrainerDialogProps> = ({
   open,
@@ -55,15 +61,14 @@ const AddTrainerDialog: React.FC<AddTrainerDialogProps> = ({
   const { loading } = useAppSelector((state) => state.trainer);
 
   const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<FormData>({
-    resolver: yupResolver(schema),
-    context: { isEdit: !!editData },
-  });
-
+  register,
+  handleSubmit,
+  reset,
+  formState: { errors },
+} = useForm<FormData>({
+  resolver: yupResolver(schema),
+  context: { isEdit: !!editData },
+});
   const handleClose = () => {
     setOpen(false);
     reset();

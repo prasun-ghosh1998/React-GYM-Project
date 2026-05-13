@@ -34,7 +34,6 @@ type FormData = {
   planFeture: string;
 };
 
-
 const AddPlanDialog: React.FC<AddPlanDialogProps> = ({ open, setOpen, editData }) => {
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state) => state.plan);
@@ -91,9 +90,8 @@ useEffect(() => {
 
   return (
     <Dialog open={open} onClose={handleClose}>
-  <DialogTitle>
-    {editData ? "Edit Plan" : "Add Plan"}
-  </DialogTitle>
+      c
+
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent
           sx={{

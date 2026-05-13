@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Container,
   Switch,
   Table,
   TableBody,
@@ -23,19 +24,12 @@ import {
 import AddMemberDialog from "../../components/AddMemberDialog";
 import { planList } from "../../store/slices/plan.slice";
 
-type Plan = {
-  $id: string;
-  title: string;
-};
-
 const Member = () => {
   const [open, setOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const dispatch = useAppDispatch();
   const { list, page, limit } = useAppSelector((state) => state.member);
-  const { list: plans = [] } = useAppSelector(
-  (state): { list: Plan[] } => state.plan
-);
+  const { list: plans } = useAppSelector((state) => state.plan);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -93,7 +87,7 @@ const Member = () => {
               {/* Plan Name */}
               <TableCell sx={{color:"white"}}>
   {row.plan
-    ? plans.find((p) => p.$id === row.plan)?.title
+    ? plans.find((p: any) => p.$id === row.plan)?.title
     : "N/A"}
 </TableCell>
 

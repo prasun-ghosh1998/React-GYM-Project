@@ -1,7 +1,6 @@
 import { Box, Container, Typography } from '@mui/material'
 import yellowFrame from "../../assets/images/yello-frame.png";
 import aboutBg from "../../assets/images/about/banner-bg.png";
-import React from 'react'
 
 const Banner = () => {
   return (

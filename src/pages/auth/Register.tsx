@@ -29,9 +29,9 @@ const Register = () => {
       lastname: "",
       email: "",
       gender: "",
-      age: "0",
+      age: "",
       phone: "",
-      weight: "0",
+      weight: "",
       goal: "",
       password: "",
       role:"user",
@@ -72,7 +72,7 @@ const Register = () => {
             }}
           >
             <Box sx={{ marginTop: "50px", marginX: "50px", color: "white" }}>
-              <img src={yellowFrame} alt="yellow-frame" />
+              <img src={yellowFrame} alt="" />
               <Typography sx={{ textTransform: "uppercase", fontSize: "27px" }}>
                 Create Account
               </Typography>
@@ -145,11 +145,7 @@ const Register = () => {
                     errors={errors}
                   />
                 ))}
-                {error && (
-  <Typography color="error" textAlign="center">
-    {error}
-  </Typography>
-)}
+                {error && <p>{error}</p>}
                 <Button
                   type="submit"
                   size="large"
@@ -199,7 +195,7 @@ const Register = () => {
                 src={loginImg}
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
-              <Link to="/" style={{fontSize:"50px",position: "absolute", right: "50px", top: "50px",color:"yellow"}}>Fitln</Link>
+              <a href="" style={{fontSize:"50px",position: "absolute", right: "50px", top: "50px",color:"yellow"}}>Fitln</a>
 
             </Box>
           </Card>

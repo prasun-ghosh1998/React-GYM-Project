@@ -12,8 +12,8 @@ import Cookies from "js-cookie";
 const user = Cookies.get("user")
   ? JSON.parse(Cookies.get("user") as string)
   : null;
-const token = Cookies.get("token") ?? null;
-const role = Cookies.get("role") ?? null;
+const token = Cookies.get("token") === "true";
+const role = Cookies.get("role") || null;
 const initialState = {
   loading: false,
   error: null as string | null,

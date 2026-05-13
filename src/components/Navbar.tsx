@@ -4,19 +4,21 @@ import {
   Button,
   Box,
   Container,
+
   IconButton,
 } from "@mui/material";
 import { NavLink } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
 import logo from "../assets/images/Logo.png";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, } from "lucide-react";
 import { useAppSelector } from "../services/helper/redux";
+
 
 const Navbar = () => {
   const { role, token } = useAppSelector((state) => state.auth);
-  console.log("role, token in navbar", role, token);
-
-  const navStyle: any = ({ isActive }: any) => ({
+    console.log("role, token in navbar", role, token);
+    
+  const navStyle:any = ({ isActive }: any) => ({
     color: isActive ? "black" : "white",
     backgroundColor: isActive ? "#FFD700" : "transparent",
     padding: "8px 18px",
@@ -68,138 +70,139 @@ const Navbar = () => {
             <Button component={NavLink} to="/testimonials" style={navStyle}>
               Testimonials
             </Button>
+
           </Box>
 
           {/* Login Button */}
           {!token ? (
-            <Button
-              component={NavLink}
-              to="/login"
+          <Button
+           component={NavLink}
+            to="/login"
+            sx={{
+              borderRadius: "50px",
+              px: 3,
+              py: 1,
+              minWidth: "auto",
+              display: "flex",
+              alignItems: "center",
+              gap: 3,
+              whiteSpace: "nowrap",
+              border: "1px solid yellow",
+              color: "yellow",
+              transition: "0.3s",
+              "&:hover": {
+                backgroundColor: "yellow",
+                color: "black",
+              },
+              "&:hover .arrowBox": {
+                transform: "translateX(8px)",
+              },
+            }}
+          >
+            Login / Create Account
+            <Box
+              className="arrowBox"
               sx={{
-                borderRadius: "50px",
-                px: 3,
-                py: 1,
-                minWidth: "auto",
+                width: "32px",
+                height: "32px",
+                backgroundColor: "yellow",
+                color: "black",
+                borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
-                gap: 3,
-                whiteSpace: "nowrap",
-                border: "1px solid yellow",
-                color: "yellow",
-                transition: "0.3s",
-                "&:hover": {
-                  backgroundColor: "yellow",
-                  color: "black",
-                },
-                "&:hover .arrowBox": {
-                  transform: "translateX(8px)",
-                },
+                justifyContent: "center",
+                transition: "transform 0.3s ease",
               }}
             >
-              Login / Create Account
-              <Box
-                className="arrowBox"
-                sx={{
-                  width: "32px",
-                  height: "32px",
-                  backgroundColor: "yellow",
-                  color: "black",
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "transform 0.3s ease",
-                }}
-              >
-                <ArrowRight fontSize="small" />
-              </Box>
-            </Button>
-          ) : role === "admin" ? (
+              <ArrowRight fontSize="small" />
+            </Box>
+          </Button>): role === "admin" ? (
             <Button
-              component={NavLink}
-              to="/admin/dashboard"
+           component={NavLink}
+            to="/admin/dashboard"
+            sx={{
+              borderRadius: "50px",
+              px: 3,
+              py: 1,
+              minWidth: "auto",
+              display: "flex",
+              alignItems: "center",
+              gap: 3,
+              whiteSpace: "nowrap",
+              border: "1px solid yellow",
+              color: "yellow",
+              transition: "0.3s",
+              "&:hover": {
+                backgroundColor: "yellow",
+                color: "black",
+              },
+              "&:hover .arrowBox": {
+                transform: "translateX(8px)",
+              },
+            }}
+          >
+            Admin Dashbaord
+            <Box
+              className="arrowBox"
               sx={{
-                borderRadius: "50px",
-                px: 3,
-                py: 1,
-                minWidth: "auto",
+                width: "32px",
+                height: "32px",
+                backgroundColor: "yellow",
+                color: "black",
+                borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
-                gap: 3,
-                whiteSpace: "nowrap",
-                border: "1px solid yellow",
-                color: "yellow",
-                transition: "0.3s",
-                "&:hover": {
-                  backgroundColor: "yellow",
-                  color: "black",
-                },
-                "&:hover .arrowBox": {
-                  transform: "translateX(8px)",
-                },
+                justifyContent: "center",
+                transition: "transform 0.3s ease",
               }}
             >
-              Admin Dashbaord
-              <Box
-                className="arrowBox"
-                sx={{
-                  width: "32px",
-                  height: "32px",
-                  backgroundColor: "yellow",
-                  color: "black",
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "transform 0.3s ease",
-                }}
-              >
-                <ArrowRight fontSize="small" />
-              </Box>
-            </Button>
-          ) : (
-            <Button
-              component={NavLink}
-              to="user"
+              <ArrowRight fontSize="small" />
+            </Box>
+          </Button>
+          ):(
+
+              <Button
+           component={NavLink}
+            to="user"
+            sx={{
+              borderRadius: "50px",
+              px: 3,
+              py: 1,
+              minWidth: "auto",
+              display: "flex",
+              alignItems: "center",
+              gap: 3,
+              whiteSpace: "nowrap",
+              border: "1px solid yellow",
+              color: "yellow",
+              transition: "0.3s",
+              "&:hover": {
+                backgroundColor: "yellow",
+                color: "black",
+              },
+              "&:hover .arrowBox": {
+                transform: "translateX(8px)",
+              },
+            }}
+          >
+            Profile
+            <Box
+              className="arrowBox"
               sx={{
-                borderRadius: "50px",
-                px: 3,
-                py: 1,
-                minWidth: "auto",
+                width: "32px",
+                height: "32px",
+                backgroundColor: "yellow",
+                color: "black",
+                borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
-                gap: 3,
-                whiteSpace: "nowrap",
-                border: "1px solid yellow",
-                color: "yellow",
-                transition: "0.3s",
-                "&:hover": {
-                  backgroundColor: "yellow",
-                  color: "black",
-                },
-                "&:hover .arrowBox": {
-                  transform: "translateX(8px)",
-                },
+                justifyContent: "center",
+                transition: "transform 0.3s ease",
               }}
             >
-              Profile
-              <Box
-                className="arrowBox"
-                sx={{
-                  width: "32px",
-                  height: "32px",
-                  backgroundColor: "yellow",
-                  color: "black",
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "transform 0.3s ease",
-                }}
-              >
-                <ArrowRight fontSize="small" />
-              </Box>
-            </Button>
+              <ArrowRight fontSize="small" />
+            </Box>
+          </Button>
           )}
 
           {/* Mobile Menu Icon */}
