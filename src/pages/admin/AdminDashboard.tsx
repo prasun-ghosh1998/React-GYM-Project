@@ -1,4 +1,4 @@
-// AdminDasboard.tsx
+
 
 import { useEffect, useState } from "react";
 import { Box, Paper, Typography } from "@mui/material";
@@ -9,11 +9,11 @@ import {
   TrendingUp,
 } from "@mui/icons-material";
 
-import { LineChart, BarChart } from "@mui/x-charts";
-import { databases, DATABASE_ID, account, } from "../../appwrite/appwriteConfig";
+import { LineChart } from "@mui/x-charts";
+import { databases, DATABASE_ID } from "../../appwrite/appwriteConfig";
 import { tables_ID } from "../../appwrite/appwriteConfig";
 
-// ✅ Stat Card
+// Stat Card
 const StatCard = ({ title, value, icon }: any) => (
   <Paper
     sx={{
@@ -46,18 +46,19 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchDashboard();
   }, []);
-  const checkUser = async () => {
-  try {
-    const user = await account.get();
-    console.log("Logged in user:", user);
-  } catch {
-    console.log("User not logged in ");
-  }
-};
+
+//   const checkUser = async () => {
+//   try {
+//     const user = await account.get();
+//     console.log("Logged in user:", user);
+//   } catch {
+//     console.log("User not logged in ");
+//   }
+// };
 
   const fetchDashboard = async () => {
     try {
-      // 👥 Members Count
+      //  Members Count
       const memberRes = await databases.listDocuments(
         DATABASE_ID,
         tables_ID.MEMBERS

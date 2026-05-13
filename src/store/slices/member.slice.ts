@@ -5,10 +5,20 @@ import {
   tables_ID,
 } from "../../appwrite/appwriteConfig";
 import { ID } from "appwrite";
+import type { MemberType } from "../../typeScript/type/member.type";
+
+type InitialStateType = {
+  list: MemberType[];
+  loading: boolean;
+  error: string | null;
+  page: number;
+  limit: number;
+  total: number;
+};
 
 // Initial State
-const initialState = {
-  list: [],
+const initialState:InitialStateType = {
+  list:[],
   loading: false,
   error: null,
   page: 1,

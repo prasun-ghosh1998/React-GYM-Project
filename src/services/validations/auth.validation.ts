@@ -7,8 +7,8 @@ export const registerSchema = yup.object().shape({
   gender: yup.string().required("Name is required"),
   age: yup.string().required("Name is required"),
   phone: yup.string().required("phone is required"),
-  weight: yup.string(),
-  goal: yup.string(),
+  weight: yup.string().optional(),
+  goal: yup.string().optional(),
   password: yup.string().required("Password is required"),
 });
 

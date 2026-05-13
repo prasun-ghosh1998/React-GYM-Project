@@ -20,7 +20,7 @@ export const registerUser = async (data: any) => {
     goal,
   } = data;
 
-  // 1️⃣ Create auth user
+  // Create auth user
   const user = await account.create(
     ID.unique(),
     email,
@@ -28,7 +28,7 @@ export const registerUser = async (data: any) => {
     `${firstname} ${lastname}`
   );
 
-  // 2️⃣ Save in USERS collection
+  // Save in USERS collection
   await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
     firstname,
     lastname,
@@ -41,7 +41,7 @@ export const registerUser = async (data: any) => {
     role: "user",
   });
 
-  // 3️⃣ 🔥 Save in MEMBERS collection
+  //  Save in MEMBERS collection
   await databases.createDocument(
     DATABASE_ID,
     tables_ID.MEMBERS,
@@ -67,16 +67,12 @@ export const loginUser = async (email: string,) => {
       [Query.equal("email", email)],
     );
     console.log("existing user", existingUser);
-    if (existingUser.total === 0) {
-      return rejectWithValue({ success: false, message: "User not found!" });
+      if (existingUser.total === 0) {
+      throw new Error("User not found!");
     }
-    // await account.deleteSessions() 
-    // await account.createEmailPasswordSession( email: data.email, password: data.password, });     
-    // const row = existingUser.rows[0];     
-    // const user = { userId: row.userId, name: row.name, email: row.email, role: row.role, };    
-    // return { success: true, message: "Login Successfull", user,   };   
-    // await account.createEmailPasswordSession(email, password);
-    // return await account.get();
+
+    return existingUser.documents[0];
+
   } catch (error: any) {
     console.error("Login Error:", error.message);
     throw error;

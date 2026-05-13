@@ -13,7 +13,6 @@ import { useAppSelector } from "../../services/helper/redux";
 import { logoutUser } from "../../store/slices/auth.slice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/images/Logo.png"
 
 const Navbar: React.FC = () => {
 

@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Container,
   Switch,
   Table,
   TableBody,
@@ -23,13 +22,16 @@ import {
 } from "../../store/slices/member.slice";
 import AddMemberDialog from "../../components/AddMemberDialog";
 import { planList } from "../../store/slices/plan.slice";
+import type { PlanType } from "../../typeScript/type/plans.type";
 
 const Member = () => {
   const [open, setOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const dispatch = useAppDispatch();
   const { list, page, limit } = useAppSelector((state) => state.member);
-  const { list: plans } = useAppSelector((state) => state.plan);
+  const { list: plans } = useAppSelector(
+  (state) => state.plan
+) as { list: PlanType[] };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -40,9 +42,9 @@ const Member = () => {
     dispatch(memberList({ params: { page, limit } }));
   }, [dispatch, page, limit]);
 
-    useEffect(() => {
-      dispatch(planList({ params: { page: 1, limit: 100 } }));
-    }, [dispatch]);
+  useEffect(() => {
+    dispatch(planList({ params: { page: 1, limit: 100 } }));
+  }, [dispatch]);
 
   return (
     <>
@@ -54,7 +56,9 @@ const Member = () => {
           mb: 2,
         }}
       >
-        <Typography variant="h6" color="#E6FF00">Gym Members</Typography>
+        <Typography variant="h6" color="#E6FF00">
+          Gym Members
+        </Typography>
 
         <Button
           variant="contained"
@@ -68,31 +72,33 @@ const Member = () => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell sx={{color:"white"}}>Name</TableCell>
-            <TableCell sx={{color:"white"}}>Email</TableCell>
-            <TableCell sx={{color:"white"}}>Phone</TableCell>
-            <TableCell sx={{color:"white"}}>Plan</TableCell>
-            <TableCell sx={{color:"white"}}>Status</TableCell>
-            <TableCell align="center" sx={{color:"white"}}>Action</TableCell>
+            <TableCell sx={{ color: "white" }}>Name</TableCell>
+            <TableCell sx={{ color: "white" }}>Email</TableCell>
+            <TableCell sx={{ color: "white" }}>Phone</TableCell>
+            <TableCell sx={{ color: "white" }}>Plan</TableCell>
+            <TableCell sx={{ color: "white" }}>Status</TableCell>
+            <TableCell align="center" sx={{ color: "white" }}>
+              Action
+            </TableCell>
           </TableRow>
         </TableHead>
 
         <TableBody>
           {list.map((row: any) => (
             <TableRow key={row.$id}>
-              <TableCell sx={{color:"white"}}>{row.name}</TableCell>
-              <TableCell sx={{color:"white"}}>{row.email}</TableCell>
-              <TableCell sx={{color:"white"}}>{row.phone}</TableCell>
+              <TableCell sx={{ color: "white" }}>{row.name}</TableCell>
+              <TableCell sx={{ color: "white" }}>{row.email}</TableCell>
+              <TableCell sx={{ color: "white" }}>{row.phone}</TableCell>
 
               {/* Plan Name */}
-              <TableCell sx={{color:"white"}}>
+             <TableCell sx={{ color: "white" }}>
   {row.plan
-    ? plans.find((p: any) => p.$id === row.plan)?.title
+    ? plans.find((p) => p.$id === row.plan)?.title
     : "N/A"}
 </TableCell>
 
               {/* Status + Toggle */}
-              <TableCell sx={{color:"white"}}>
+              <TableCell sx={{ color: "white" }}>
                 <Switch
                   checked={row.status === "active"}
                   onChange={() =>

@@ -5,12 +5,13 @@ import { Link, useNavigate } from "react-router-dom";
 import DynamicInput from "../../components/DyanamicInputs";
 import { RegisterInputField } from "../../services/json/inputsData/register.input";
 import type { RegisterData } from "../../typeScript/type/auth.type";
-import { registerSchema } from "../../services/validations/auth.validation";
+// import { registerSchema } from "../../services/validations/auth.validation";
 import { useAppDispatch, useAppSelector } from "../../services/helper/redux";
 import { registerUser } from "../../store/slices/auth.slice";
 import { toast } from "sonner";
 import yellowFrame from "../../assets/images/yello-frame.png";
 import loginImg from "../../assets/images/login_img.png";
+import { registerSchema } from "../../services/validations/auth.validation";
 
 const Register = () => {
   const navigate = useNavigate();

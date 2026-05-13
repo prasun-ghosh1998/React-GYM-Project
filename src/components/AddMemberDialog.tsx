@@ -40,6 +40,15 @@ type FormData = {
   plan: string;
 };
 
+type PlanType = {
+  $id: string;
+  title: string;
+  price: number;
+  duration: number;
+};
+
+
+
 const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
   open,
   setOpen,
@@ -47,7 +56,9 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state) => state.member);
-  const { list: plans = [] } = useAppSelector((state) => state.plan);
+  const { list: plans = [] } = useAppSelector(
+  (state) => state.plan
+) as { list: PlanType[] };
 
   const {
     control,
@@ -89,7 +100,9 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
   }, [editData, reset]);
 
  const onSubmit = async (data: FormData) => {
-  const selectedPlan = plans.find((p: any) => p.$id === data.plan);
+  const selectedPlan = plans.find(
+  (p) => p.$id === data.plan
+);
 
   if (!selectedPlan) {
     toast.error("Please select a valid plan");
@@ -125,7 +138,7 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({
       toast.success("Member Added!");
     }
 
-    // ✅ refresh list
+    // refresh list
     dispatch(memberList({ params: { page: 1, limit: 5 } }));
 
     reset();

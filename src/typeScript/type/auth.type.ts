@@ -12,10 +12,10 @@ export type RegisterData = {
   gender:string,
   age:string,
   phone: string;
-  weight?: string;
-  goal?: string;
+  weight: string | undefined;
+  goal: string | undefined;
   password: string;
-  role?: string;
+  role: string;
 };
 
 type LoginSuccessPayload = {

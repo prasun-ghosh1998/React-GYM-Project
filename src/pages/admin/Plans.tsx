@@ -26,7 +26,7 @@ import { useAppDispatch, useAppSelector } from "../../services/helper/redux";
 import AddPlanDialog from "../../components/AddPlanDialog";
 
 const Plans = () => {
-  const { loading, error, list, page, limit } = useAppSelector(
+  const { list, page, limit } = useAppSelector(
     (state) => state.plan,
   );
   const dispatch = useAppDispatch();
