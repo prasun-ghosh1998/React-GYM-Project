@@ -4,11 +4,26 @@ import {
   databases,
   tables_ID,
 } from "../../appwrite/appwriteConfig";
-import { Query } from "appwrite";
-import { ID } from "appwrite";
+import { Query, ID } from "appwrite";
 
-//  Initial State
-const initialState = {
+export type PlanType = {
+  $id: string;
+  title: string;
+  price: number;
+  duration: number;
+  status: "publish" | "draft";
+};
+
+type InitialStateType = {
+  list: PlanType[];
+  loading: boolean;
+  error: string | null;
+  page: number;
+  limit: number;
+  total: number;
+};
+
+const initialState: InitialStateType = {
   list: [],
   loading: false,
   error: null,
@@ -17,12 +32,15 @@ const initialState = {
   total: 0,
 };
 
-//  Get Plans
+// Get Plans
 export const planList = createAsyncThunk(
   "plan/list",
-  async (payload: any = {}, { rejectWithValue }) => {
+  async (
+    payload: { params?: { page?: number; limit?: number } } = {},
+    { rejectWithValue }
+  ) => {
     try {
-      const { page = 1, limit = 5 } = payload?.params || {};
+      const { page = 1, limit = 5 } = payload.params || {};
 
       const res = await databases.listDocuments(
         DATABASE_ID,
@@ -31,7 +49,7 @@ export const planList = createAsyncThunk(
       );
 
       return {
-        list: res.documents,
+        list: res.documents as unknown as PlanType[],
         total: res.total,
         page,
         limit,
@@ -42,9 +60,13 @@ export const planList = createAsyncThunk(
   }
 );
 
+// Add Plan
 export const addPlan = createAsyncThunk(
   "plan/add",
-  async (data: any, { rejectWithValue }) => {
+  async (
+    data: Omit<PlanType, "$id" | "status">,
+    { rejectWithValue }
+  ) => {
     try {
       const res = await databases.createDocument(
         DATABASE_ID,
@@ -53,50 +75,58 @@ export const addPlan = createAsyncThunk(
         {
           ...data,
           status: "publish",
-        },
+        }
       );
 
-      return res;
+      return res as unknown as PlanType;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  },
+  }
 );
 
+// Delete Plan
 export const deletePlan = createAsyncThunk(
   "plan/delete",
   async (id: string, { rejectWithValue }) => {
     try {
       await databases.deleteDocument(DATABASE_ID, tables_ID.PLANS, id);
-
       return id;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  },
+  }
 );
 
+// Update Plan
 export const updatePlan = createAsyncThunk(
   "plan/update",
-  async ({ id, data }: any, { rejectWithValue }) => {
+  async (
+    { id, data }: { id: string; data: Partial<Omit<PlanType, "$id">> },
+    { rejectWithValue }
+  ) => {
     try {
       const res = await databases.updateDocument(
         DATABASE_ID,
         tables_ID.PLANS,
         id,
-        data,
+        data
       );
 
-      return res;
+      return res as unknown as PlanType;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  },
+  }
 );
 
+// Status Change
 export const statusChange = createAsyncThunk(
   "plan/status",
-  async ({ id, currentStatus }: any, { rejectWithValue }) => {
+  async (
+    { id, currentStatus }: { id: string; currentStatus: "publish" | "draft" },
+    { rejectWithValue }
+  ) => {
     try {
       const res = await databases.updateDocument(
         DATABASE_ID,
@@ -104,14 +134,14 @@ export const statusChange = createAsyncThunk(
         id,
         {
           status: currentStatus === "publish" ? "draft" : "publish",
-        },
+        }
       );
 
-      return res;
+      return res as unknown as PlanType;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  },
+  }
 );
 
 const planSlice = createSlice({
@@ -125,6 +155,7 @@ const planSlice = createSlice({
 
     setNext: (state) => {
       const totalPages = Math.ceil(state.total / state.limit);
+
       if (state.page < totalPages) {
         state.page += 1;
       }
@@ -139,21 +170,26 @@ const planSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
-
+      // Plan List
       .addCase(planList.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
+
       .addCase(planList.fulfilled, (state, action) => {
         state.loading = false;
         state.list = action.payload.list;
         state.total = action.payload.total;
         state.page = action.payload.page;
+        state.limit = action.payload.limit;
       })
+
       .addCase(planList.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
+
+      // Add Plan
       .addCase(addPlan.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -170,16 +206,18 @@ const planSlice = createSlice({
         state.error = action.payload as string;
       })
 
+      // Delete Plan
       .addCase(deletePlan.fulfilled, (state, action) => {
         state.list = state.list.filter(
-          (item: any) => item.$id !== action.payload,
+          (item) => item.$id !== action.payload
         );
         state.total -= 1;
       })
 
+      // Update Plan
       .addCase(updatePlan.fulfilled, (state, action) => {
         const index = state.list.findIndex(
-          (item: any) => item.$id === action.payload.$id,
+          (item) => item.$id === action.payload.$id
         );
 
         if (index !== -1) {
@@ -187,9 +225,10 @@ const planSlice = createSlice({
         }
       })
 
+      // Status Change
       .addCase(statusChange.fulfilled, (state, action) => {
         const index = state.list.findIndex(
-          (item: any) => item.$id === action.payload.$id,
+          (item) => item.$id === action.payload.$id
         );
 
         if (index !== -1) {

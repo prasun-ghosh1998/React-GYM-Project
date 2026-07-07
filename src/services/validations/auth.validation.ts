@@ -7,9 +7,14 @@ export const registerSchema = yup.object().shape({
   gender: yup.string().required("Name is required"),
   age: yup.string().required("Name is required"),
   phone: yup.string().required("phone is required"),
-  weight: yup.string().optional(),
-  goal: yup.string().optional(),
+  weight: yup.string().required("Weight is required"),
+  goal: yup.string().required("Goal is required"),
   password: yup.string().required("Password is required"),
+  role: yup
+    .mixed<"user" | "admin">()
+    .oneOf(["user", "admin"])
+    .defined()
+    .required(),
 });
 
 export const loginSchema = yup.object().shape({

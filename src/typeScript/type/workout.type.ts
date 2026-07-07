@@ -7,7 +7,7 @@ export type Workout = {
   name: string;
   img: string;
   imageId?: string;
-  status?: string;
+  status: "publish" | "draft";
 };
 
 export type WorkoutState = {

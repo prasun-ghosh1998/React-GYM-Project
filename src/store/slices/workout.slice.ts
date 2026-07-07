@@ -6,12 +6,10 @@ import {
   storage,
   tables_ID,
 } from "../../appwrite/appwriteConfig";
-import { Query } from "appwrite";
-import { ID } from "appwrite";
-import type { WorkoutState } from "../../typeScript/type/workout.type";
+import { Query, ID } from "appwrite";
+import type { Workout, WorkoutState } from "../../typeScript/type/workout.type";
 
-//  Initial State
-const initialState:WorkoutState = {
+const initialState: WorkoutState = {
   list: [],
   loading: false,
   error: null,
@@ -20,21 +18,24 @@ const initialState:WorkoutState = {
   total: 0,
 };
 
-//  Get Workout
+// Get Workout
 export const workoutList = createAsyncThunk(
   "workout/list",
-  async ({ params }: any, { rejectWithValue }) => {
+  async (
+    payload: { params?: { page?: number; limit?: number } } = {},
+    { rejectWithValue }
+  ) => {
     try {
-      const { page = 1, limit = 5 } = params;
+      const { page = 1, limit = 5 } = payload.params || {};
 
       const res = await databases.listDocuments(
         DATABASE_ID,
         tables_ID.WORKOUTS,
-        [Query.limit(limit), Query.offset((page - 1) * limit)],
+        [Query.limit(limit), Query.offset((page - 1) * limit)]
       );
 
       return {
-        list: res.documents,
+        list: res.documents as unknown as Workout[],
         total: res.total,
         page,
         limit,
@@ -42,12 +43,16 @@ export const workoutList = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  },
+  }
 );
 
+// Add Workout
 export const addWorkout = createAsyncThunk(
   "workout/add",
-  async (data: any, { rejectWithValue }) => {
+  async (
+    data: Omit<Workout, "$id" | "status">,
+    { rejectWithValue }
+  ) => {
     try {
       const res = await databases.createDocument(
         DATABASE_ID,
@@ -56,16 +61,17 @@ export const addWorkout = createAsyncThunk(
         {
           ...data,
           status: "publish",
-        },
+        }
       );
 
-      return res;
+      return res as unknown as Workout;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  },
+  }
 );
 
+// Delete Workout
 export const deleteWorkout = createAsyncThunk(
   "workout/delete",
   async (
@@ -81,11 +87,7 @@ export const deleteWorkout = createAsyncThunk(
         }
       }
 
-      await databases.deleteDocument(
-        DATABASE_ID,
-        tables_ID.WORKOUTS,
-        id
-      );
+      await databases.deleteDocument(DATABASE_ID, tables_ID.WORKOUTS, id);
 
       return id;
     } catch (error: any) {
@@ -94,27 +96,35 @@ export const deleteWorkout = createAsyncThunk(
   }
 );
 
+// Update Workout
 export const updateWorkout = createAsyncThunk(
   "workout/update",
-  async ({ id, data }: any, { rejectWithValue }) => {
+  async (
+    { id, data }: { id: string; data: Partial<Omit<Workout, "$id">> },
+    { rejectWithValue }
+  ) => {
     try {
       const res = await databases.updateDocument(
         DATABASE_ID,
         tables_ID.WORKOUTS,
         id,
-        data,
+        data
       );
 
-      return res;
+      return res as unknown as Workout;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  },
+  }
 );
 
-export const statusChange = createAsyncThunk(
+// Status Change
+export const statusChangeWorkout = createAsyncThunk(
   "workout/status",
-  async ({ id, currentStatus }: any, { rejectWithValue }) => {
+  async (
+    { id, currentStatus }: { id: string; currentStatus: "publish" | "draft" },
+    { rejectWithValue }
+  ) => {
     try {
       const res = await databases.updateDocument(
         DATABASE_ID,
@@ -122,33 +132,34 @@ export const statusChange = createAsyncThunk(
         id,
         {
           status: currentStatus === "publish" ? "draft" : "publish",
-        },
+        }
       );
 
-      return res;
+      return res as unknown as Workout;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  },
+  }
 );
 
 const workoutSlice = createSlice({
   name: "workout",
   initialState,
   reducers: {
-    setLimit: (state, action) => {
+    setLimitWorkout: (state, action) => {
       state.limit = action.payload;
       state.page = 1;
     },
 
-    setNext: (state) => {
+    setNextWorkout: (state) => {
       const totalPages = Math.ceil(state.total / state.limit);
+
       if (state.page < totalPages) {
         state.page += 1;
       }
     },
 
-    setPrev: (state) => {
+    setPrevWorkout: (state) => {
       if (state.page > 1) {
         state.page -= 1;
       }
@@ -157,21 +168,24 @@ const workoutSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
-
       .addCase(workoutList.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
+
       .addCase(workoutList.fulfilled, (state, action) => {
         state.loading = false;
         state.list = action.payload.list;
         state.total = action.payload.total;
         state.page = action.payload.page;
+        state.limit = action.payload.limit;
       })
+
       .addCase(workoutList.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
+
       .addCase(addWorkout.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -190,14 +204,14 @@ const workoutSlice = createSlice({
 
       .addCase(deleteWorkout.fulfilled, (state, action) => {
         state.list = state.list.filter(
-          (item: any) => item.$id !== action.payload,
+          (item) => item.$id !== action.payload
         );
         state.total -= 1;
       })
 
       .addCase(updateWorkout.fulfilled, (state, action) => {
         const index = state.list.findIndex(
-          (item: any) => item.$id === action.payload.$id,
+          (item) => item.$id === action.payload.$id
         );
 
         if (index !== -1) {
@@ -205,9 +219,9 @@ const workoutSlice = createSlice({
         }
       })
 
-      .addCase(statusChange.fulfilled, (state, action) => {
+      .addCase(statusChangeWorkout.fulfilled, (state, action) => {
         const index = state.list.findIndex(
-          (item: any) => item.$id === action.payload.$id,
+          (item) => item.$id === action.payload.$id
         );
 
         if (index !== -1) {
@@ -217,6 +231,10 @@ const workoutSlice = createSlice({
   },
 });
 
-export const { setLimit, setNext, setPrev } = workoutSlice.actions;
+export const {
+  setLimitWorkout,
+  setNextWorkout,
+  setPrevWorkout,
+} = workoutSlice.actions;
 
 export default workoutSlice.reducer;

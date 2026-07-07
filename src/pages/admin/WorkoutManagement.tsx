@@ -14,37 +14,41 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+
 import { useAppDispatch, useAppSelector } from "../../services/helper/redux";
 import {
   deleteWorkout,
-  setLimit,
-  setNext,
-  setPrev,
-  statusChange,
+  setLimitWorkout,
+  setNextWorkout,
+  setPrevWorkout,
+  statusChangeWorkout,
   workoutList,
 } from "../../store/slices/workout.slice";
+
 import AddWorkoutDialog from "../../components/AddWorkoutDialog";
+import type { Workout } from "../../typeScript/type/workout.type";
 
 const WorkoutManagement = () => {
   const { loading, error, list, page, limit } = useAppSelector(
-    (state) => state.workout,
+    (state) => state.workout
   );
+
   const dispatch = useAppDispatch();
 
   const [open, setOpen] = useState(false);
-  const [editData, setEditData] = useState<any>(null);
+  const [editData, setEditData] = useState<Workout | null>(null);
 
   const handleClickOpen = () => {
-    setOpen(true);
     setEditData(null);
+    setOpen(true);
   };
 
   useEffect(() => {
     dispatch(workoutList({ params: { page, limit } }));
   }, [dispatch, page, limit]);
+
   return (
     <Container>
-      {/* Header */}
       <Box
         sx={{
           display: "flex",
@@ -53,12 +57,16 @@ const WorkoutManagement = () => {
           mb: 2,
         }}
       >
-        <Typography variant="h6" color="#E6FF00">Gym Workout Management</Typography>
+        <Typography variant="h6" color="#E6FF00">
+          Gym Workout Management
+        </Typography>
 
         <Button
           variant="contained"
           onClick={handleClickOpen}
-          sx={{ background: "linear-gradient(45deg, #1976d2, #42a5f5)" }}
+          sx={{
+            background: "linear-gradient(45deg, #1976d2, #42a5f5)",
+          }}
         >
           Add Workouts
         </Button>
@@ -66,9 +74,8 @@ const WorkoutManagement = () => {
 
       <AddWorkoutDialog open={open} setOpen={setOpen} editData={editData} />
 
-      {/* Table */}
       {loading && <Typography>Loading...</Typography>}
-{error && <Typography color="error">{error}</Typography>}
+      {error && <Typography color="error">{error}</Typography>}
 
       <TableContainer component={Paper}>
         <Table>
@@ -84,55 +91,70 @@ const WorkoutManagement = () => {
           </TableHead>
 
           <TableBody>
-            {list?.map((row: any) => (
+            {list?.map((row: Workout) => (
               <TableRow key={row.$id}>
                 <TableCell>{row.title}</TableCell>
                 <TableCell>{row.tag}</TableCell>
                 <TableCell>{row.desc}</TableCell>
                 <TableCell>{row.name}</TableCell>
+
                 <TableCell>
-                  <img src={row.img} alt="workout" width={60} />
+                  {row.img && (
+                    <img
+                      src={row.img}
+                      alt={row.title}
+                      width={60}
+                      height={60}
+                      style={{ objectFit: "cover", borderRadius: 6 }}
+                    />
+                  )}
                 </TableCell>
-                <TableCell sx={{ display: "flex" }}>
-                  {/* Status Toggle */}
-                  <Switch
-                    checked={row.status === "publish"}
-                    onChange={() =>
-                      dispatch(
-                        statusChange({
-                          id: row.$id,
-                          currentStatus: row.status,
-                        }),
-                      )
-                    }
-                  />
 
-                  {/* Edit */}
-                  <Button
-                    variant="contained"
-                    sx={{ backgroundColor: "#d5d50e", ml: 1 }}
-                    onClick={() => {
-                      setEditData(row);
-                      setOpen(true);
-                    }}
-                  >
-                    Edit
-                  </Button>
+                <TableCell>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Switch
+                      checked={row.status === "publish"}
+                      onChange={() =>
+                        dispatch(
+                          statusChangeWorkout({
+                            id: row.$id,
+                            currentStatus: row.status,
+                          })
+                        )
+                      }
+                    />
 
-                  {/* Delete */}
-                  <Button
-                    variant="contained"
-                    sx={{ backgroundColor: "#dd3a2b", ml: 1 }}
-                    onClick={() => dispatch(deleteWorkout(row.$id))}
-                  >
-                    Delete
-                  </Button>
+                    <Button
+                      variant="contained"
+                      sx={{ backgroundColor: "#d5d50e", ml: 1 }}
+                      onClick={() => {
+                        setEditData(row);
+                        setOpen(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+
+                    <Button
+                      variant="contained"
+                      sx={{ backgroundColor: "#dd3a2b", ml: 1 }}
+                      onClick={() =>
+                        dispatch(
+                          deleteWorkout({
+                            id: row.$id,
+                            imageId: row.imageId,
+                          })
+                        )
+                      }
+                    >
+                      Delete
+                    </Button>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
 
-          {/* Footer */}
           <TableFooter>
             <TableRow>
               <TableCell colSpan={6}>
@@ -146,7 +168,7 @@ const WorkoutManagement = () => {
                   <Button
                     variant="contained"
                     sx={{ backgroundColor: "red" }}
-                    onClick={() => dispatch(setPrev())}
+                    onClick={() => dispatch(setPrevWorkout())}
                     disabled={page === 1}
                   >
                     Prev
@@ -157,15 +179,16 @@ const WorkoutManagement = () => {
                   <Button
                     variant="contained"
                     sx={{ backgroundColor: "green" }}
-                    onClick={() => dispatch(setNext())}
+                    onClick={() => dispatch(setNextWorkout())}
                   >
                     Next
                   </Button>
 
-                  {/* Limit */}
                   <select
                     value={limit}
-                    onChange={(e) => dispatch(setLimit(Number(e.target.value)))}
+                    onChange={(e) =>
+                      dispatch(setLimitWorkout(Number(e.target.value)))
+                    }
                   >
                     <option value={5}>5</option>
                     <option value={10}>10</option>

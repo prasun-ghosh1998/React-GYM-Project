@@ -8,7 +8,25 @@ import {
 } from "../../appwrite/appwriteConfig";
 import { Query, ID } from "appwrite";
 
-const initialState = {
+export type Trainer = {
+  $id: string;
+  name: string;
+  title: string;
+  img: string;
+  imageId?: string;
+  status: "publish" | "draft";
+};
+
+export type TrainerState = {
+  list: Trainer[];
+  loading: boolean;
+  error: string | null;
+  page: number;
+  limit: number;
+  total: number;
+};
+
+const initialState: TrainerState = {
   list: [],
   loading: false,
   error: null,
@@ -20,9 +38,12 @@ const initialState = {
 // GET
 export const trainerList = createAsyncThunk(
   "trainer/list",
-  async ({ params }: any, { rejectWithValue }) => {
+  async (
+    payload: { params?: { page?: number; limit?: number } } = {},
+    { rejectWithValue }
+  ) => {
     try {
-      const { page = 1, limit = 5 } = params;
+      const { page = 1, limit = 5 } = payload.params || {};
 
       const res = await databases.listDocuments(
         DATABASE_ID,
@@ -31,7 +52,7 @@ export const trainerList = createAsyncThunk(
       );
 
       return {
-        list: res.documents,
+        list: res.documents as unknown as Trainer[],
         total: res.total,
         page,
         limit,
@@ -45,14 +66,22 @@ export const trainerList = createAsyncThunk(
 // ADD
 export const addTrainer = createAsyncThunk(
   "trainer/add",
-  async (data: any, { rejectWithValue }) => {
+  async (
+    data: Omit<Trainer, "$id" | "status">,
+    { rejectWithValue }
+  ) => {
     try {
-      return await databases.createDocument(
+      const res = await databases.createDocument(
         DATABASE_ID,
         tables_ID.TRAINERS,
         ID.unique(),
-        { ...data, status: "publish" }
+        {
+          ...data,
+          status: "publish",
+        }
       );
+
+      return res as unknown as Trainer;
     } catch (err: any) {
       return rejectWithValue(err.message);
     }
@@ -62,12 +91,17 @@ export const addTrainer = createAsyncThunk(
 // DELETE
 export const deleteTrainer = createAsyncThunk(
   "trainer/delete",
-  async ({ id, imageId }: any, { rejectWithValue }) => {
+  async (
+    { id, imageId }: { id: string; imageId?: string },
+    { rejectWithValue }
+  ) => {
     try {
       if (imageId) {
         try {
           await storage.deleteFile(BUCKET_ID, imageId);
-        } catch {}
+        } catch {
+          // ignore image delete error
+        }
       }
 
       await databases.deleteDocument(
@@ -86,14 +120,19 @@ export const deleteTrainer = createAsyncThunk(
 // UPDATE
 export const updateTrainer = createAsyncThunk(
   "trainer/update",
-  async ({ id, data }: any, { rejectWithValue }) => {
+  async (
+    { id, data }: { id: string; data: Partial<Omit<Trainer, "$id">> },
+    { rejectWithValue }
+  ) => {
     try {
-      return await databases.updateDocument(
+      const res = await databases.updateDocument(
         DATABASE_ID,
         tables_ID.TRAINERS,
         id,
         data
       );
+
+      return res as unknown as Trainer;
     } catch (err: any) {
       return rejectWithValue(err.message);
     }
@@ -103,9 +142,15 @@ export const updateTrainer = createAsyncThunk(
 // STATUS
 export const statusChangeTrainer = createAsyncThunk(
   "trainer/status",
-  async ({ id, currentStatus }: any, { rejectWithValue }) => {
+  async (
+    {
+      id,
+      currentStatus,
+    }: { id: string; currentStatus: "publish" | "draft" },
+    { rejectWithValue }
+  ) => {
     try {
-      return await databases.updateDocument(
+      const res = await databases.updateDocument(
         DATABASE_ID,
         tables_ID.TRAINERS,
         id,
@@ -113,6 +158,8 @@ export const statusChangeTrainer = createAsyncThunk(
           status: currentStatus === "publish" ? "draft" : "publish",
         }
       );
+
+      return res as unknown as Trainer;
     } catch (err: any) {
       return rejectWithValue(err.message);
     }
@@ -127,46 +174,83 @@ const trainerSlice = createSlice({
       state.limit = action.payload;
       state.page = 1;
     },
+
     setNextTrainer: (state) => {
       const totalPages = Math.ceil(state.total / state.limit);
-      if (state.page < totalPages) state.page += 1;
+
+      if (state.page < totalPages) {
+        state.page += 1;
+      }
     },
+
     setPrevTrainer: (state) => {
-      if (state.page > 1) state.page -= 1;
+      if (state.page > 1) {
+        state.page -= 1;
+      }
     },
   },
+
   extraReducers: (builder) => {
     builder
       .addCase(trainerList.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
+
       .addCase(trainerList.fulfilled, (state, action) => {
         state.loading = false;
         state.list = action.payload.list;
         state.total = action.payload.total;
         state.page = action.payload.page;
+        state.limit = action.payload.limit;
       })
+
+      .addCase(trainerList.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      .addCase(addTrainer.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+
       .addCase(addTrainer.fulfilled, (state, action) => {
+        state.loading = false;
         state.list.unshift(action.payload);
         state.total += 1;
       })
+
+      .addCase(addTrainer.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
       .addCase(deleteTrainer.fulfilled, (state, action) => {
         state.list = state.list.filter(
-          (item: any) => item.$id !== action.payload
+          (item) => item.$id !== action.payload
         );
         state.total -= 1;
       })
+
       .addCase(updateTrainer.fulfilled, (state, action) => {
-        const i = state.list.findIndex(
-          (x: any) => x.$id === action.payload.$id
+        const index = state.list.findIndex(
+          (item) => item.$id === action.payload.$id
         );
-        if (i !== -1) state.list[i] = action.payload;
+
+        if (index !== -1) {
+          state.list[index] = action.payload;
+        }
       })
+
       .addCase(statusChangeTrainer.fulfilled, (state, action) => {
-        const i = state.list.findIndex(
-          (x: any) => x.$id === action.payload.$id
+        const index = state.list.findIndex(
+          (item) => item.$id === action.payload.$id
         );
-        if (i !== -1) state.list[i] = action.payload;
+
+        if (index !== -1) {
+          state.list[index] = action.payload;
+        }
       });
   },
 });

@@ -16,9 +16,8 @@ type InitialStateType = {
   total: number;
 };
 
-// Initial State
-const initialState:InitialStateType = {
-  list:[],
+const initialState: InitialStateType = {
+  list: [],
   loading: false,
   error: null,
   page: 1,
@@ -26,24 +25,24 @@ const initialState:InitialStateType = {
   total: 0,
 };
 
-// ✅ GET MEMBERS (ONLY members collection)
+const formatMember = (user: any): MemberType => ({
+  $id: user.$id,
+  name: user.name || "N/A",
+  email: user.email || "N/A",
+  phone: user.phone || "N/A",
+  status: user.status || "active",
+  plan: user.plan || "",
+});
+
 export const memberList = createAsyncThunk(
   "member/list",
   async ({ params }: any, { rejectWithValue }) => {
     try {
       const { page = 1, limit = 5 } = params;
 
-      const res = await databases.listDocuments(
-        DATABASE_ID,
-        tables_ID.MEMBERS
-      );
+      const res = await databases.listDocuments(DATABASE_ID, tables_ID.MEMBERS);
 
-      const formatted = res.documents.map((user: any) => ({
-        ...user,
-        name: user.name || "N/A",
-        phone: user.phone || "N/A",
-        status: user.status || "active",
-      }));
+      const formatted: MemberType[] = res.documents.map(formatMember);
 
       const start = (page - 1) * limit;
       const paginated = formatted.slice(start, start + limit);
@@ -60,10 +59,12 @@ export const memberList = createAsyncThunk(
   }
 );
 
-// ✅ ADD MEMBER
 export const addMember = createAsyncThunk(
   "member/add",
-  async (data: any, { rejectWithValue }) => {
+  async (
+    data: Omit<MemberType, "$id" | "status">,
+    { rejectWithValue }
+  ) => {
     try {
       const res = await databases.createDocument(
         DATABASE_ID,
@@ -75,23 +76,19 @@ export const addMember = createAsyncThunk(
           source: "admin",
         }
       );
-      return res;
+
+      return formatMember(res);
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
   }
 );
 
-// ✅ DELETE
 export const deleteMember = createAsyncThunk(
   "member/delete",
   async (id: string, { rejectWithValue }) => {
     try {
-      await databases.deleteDocument(
-        DATABASE_ID,
-        tables_ID.MEMBERS,
-        id
-      );
+      await databases.deleteDocument(DATABASE_ID, tables_ID.MEMBERS, id);
       return id;
     } catch (error: any) {
       return rejectWithValue(error.message);
@@ -99,10 +96,12 @@ export const deleteMember = createAsyncThunk(
   }
 );
 
-// ✅ UPDATE
 export const updateMember = createAsyncThunk(
   "member/update",
-  async ({ id, data }: any, { rejectWithValue }) => {
+  async (
+    { id, data }: { id: string; data: Partial<Omit<MemberType, "$id">> },
+    { rejectWithValue }
+  ) => {
     try {
       const res = await databases.updateDocument(
         DATABASE_ID,
@@ -110,17 +109,20 @@ export const updateMember = createAsyncThunk(
         id,
         data
       );
-      return res;
+
+      return formatMember(res);
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
   }
 );
 
-// ✅ STATUS
 export const statusChange = createAsyncThunk(
   "member/status",
-  async ({ id, currentStatus }: any, { rejectWithValue }) => {
+  async (
+    { id, currentStatus }: { id: string; currentStatus: string },
+    { rejectWithValue }
+  ) => {
     try {
       const res = await databases.updateDocument(
         DATABASE_ID,
@@ -130,7 +132,8 @@ export const statusChange = createAsyncThunk(
           status: currentStatus === "active" ? "inactive" : "active",
         }
       );
-      return res;
+
+      return formatMember(res);
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
@@ -145,25 +148,37 @@ const memberSlice = createSlice({
       state.limit = action.payload;
       state.page = 1;
     },
+
     setNext: (state) => {
       const totalPages = Math.ceil(state.total / state.limit);
-      if (state.page < totalPages) state.page += 1;
+
+      if (state.page < totalPages) {
+        state.page += 1;
+      }
     },
+
     setPrev: (state) => {
-      if (state.page > 1) state.page -= 1;
+      if (state.page > 1) {
+        state.page -= 1;
+      }
     },
   },
+
   extraReducers: (builder) => {
     builder
       .addCase(memberList.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
+
       .addCase(memberList.fulfilled, (state, action) => {
         state.loading = false;
         state.list = action.payload.list;
         state.total = action.payload.total;
         state.page = action.payload.page;
+        state.limit = action.payload.limit;
       })
+
       .addCase(memberList.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
@@ -175,27 +190,35 @@ const memberSlice = createSlice({
       })
 
       .addCase(deleteMember.fulfilled, (state, action) => {
-        state.list = state.list.filter(
-          (item: any) => item.$id !== action.payload
-        );
-        state.total -= 1;
+        state.list = state.list.filter((item) => item.$id !== action.payload);
+
+        if (state.total > 0) {
+          state.total -= 1;
+        }
       })
 
       .addCase(updateMember.fulfilled, (state, action) => {
         const index = state.list.findIndex(
-          (item: any) => item.$id === action.payload.$id
+          (item) => item.$id === action.payload.$id
         );
-        if (index !== -1) state.list[index] = action.payload;
+
+        if (index !== -1) {
+          state.list[index] = action.payload;
+        }
       })
 
       .addCase(statusChange.fulfilled, (state, action) => {
         const index = state.list.findIndex(
-          (item: any) => item.$id === action.payload.$id
+          (item) => item.$id === action.payload.$id
         );
-        if (index !== -1) state.list[index] = action.payload;
+
+        if (index !== -1) {
+          state.list[index] = action.payload;
+        }
       });
   },
 });
 
 export const { setLimit, setNext, setPrev } = memberSlice.actions;
+
 export default memberSlice.reducer;
